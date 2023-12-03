@@ -53,17 +53,18 @@ mod tests {
   use test::Bencher;
   use utils::read_file_to_string;
 
+  const FILE_NAME: &str = "inputs/day_02_a.txt";
+  const TASK_NAME: &str = "day_02_a";
+
   #[test]
-  fn it_works() {
+  fn test_day_02_a() {
     const ITERATIONS: u128 = 1;
-    const FILE_NAME: &str = "inputs/day_02_a.txt";
     const ANSWER: Option<u32> = Some(2268);
-    utils::run_method::<u32>(&get_possible_games, FILE_NAME, ITERATIONS, ANSWER, "day 02 a");
+    utils::run_method::<u32>(&get_possible_games, FILE_NAME, ITERATIONS, ANSWER, TASK_NAME);
   }
 
   #[bench]
   fn bench_day_02_a(b: &mut Bencher) {
-    const FILE_NAME: &str = "inputs/day_02_a.txt";
     let input = read_file_to_string(FILE_NAME);
     b.iter(|| get_possible_games(input.clone()));
   }

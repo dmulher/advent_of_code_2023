@@ -67,17 +67,18 @@ mod tests {
   use test::Bencher;
   use utils::read_file_to_string;
 
+  const FILE_NAME: &str = "inputs/day_03_a.txt";
+  const TASK_NAME: &str = "day_03_a";
+
   #[test]
-  fn day_03_a_it_works() {
-    const ITERATIONS: u128 = 20;
-    const FILE_NAME: &str = "inputs/day_03_a.txt";
+  fn test_day_03_a() {
+    const ITERATIONS: u128 = 1;
     const ANSWER: Option<u32> = Some(527144);
-    utils::run_method::<u32>(&sum_active_symbols, FILE_NAME, ITERATIONS, ANSWER, "day 03 a");
+    utils::run_method::<u32>(&sum_active_symbols, FILE_NAME, ITERATIONS, ANSWER, TASK_NAME);
   }
 
   #[bench]
-  fn bench_day_02_a(b: &mut Bencher) {
-    const FILE_NAME: &str = "inputs/day_03_a.txt";
+  fn bench_day_03_a(b: &mut Bencher) {
     let input = read_file_to_string(FILE_NAME);
     b.iter(|| sum_active_symbols(input.clone()));
   }

@@ -9,17 +9,17 @@ pub fn sum_active_symbols(contents: String) -> u32 {
 fn check_line(line: &HashMap<usize, char>, y: usize, x: usize) -> Vec<(usize, usize)> {
   let mut possible_nums: Vec<(usize, usize)> = vec![];
   let mut middle = false;
-  if line[&y].is_digit(10) && line[&y] != '.' {
+  if line[&y].is_digit(10) {
     possible_nums.push((x, y));
     middle = true;
   }
   if !middle && y > 0 {
-    if line[&(y-1)].is_digit(10) && line[&(y-1)] != '.' {
+    if line[&(y-1)].is_digit(10) {
       possible_nums.push((x, y-1));
     }
   }
   if !middle && y < line.len() - 1 {
-    if line[&(y+1)].is_digit(10) && line[&(y+1)] != '.' {
+    if line[&(y+1)].is_digit(10) {
       possible_nums.push((x, y+1));
     }
   }
@@ -47,12 +47,12 @@ fn get_symbols(contents: &String) -> u32 {
         possible_nums = possible_nums.into_iter().chain(check_line(&map[&(x-1)], y, x-1).into_iter()).collect();
       }
       if y > 0 {
-        if line[&(y-1)].is_digit(10) && line[&(y-1)] != '.' {
+        if line[&(y-1)].is_digit(10) {
           possible_nums.push((x, y-1));
         }
       }
       if y < line.len() - 1 {
-        if line[&(y+1)].is_digit(10) && line[&(y+1)] != '.' {
+        if line[&(y+1)].is_digit(10) {
           possible_nums.push((x, y+1));
         }
       }
@@ -69,7 +69,7 @@ fn get_symbols(contents: &String) -> u32 {
           // Get leftmost index
           let mut next = ny;
           while let Some(left) = n_line.get(&(next - 1)) {
-            if left.is_digit(10) && left != &'.' {
+            if left.is_digit(10) {
               next -= 1;
             } else {
               break;
@@ -78,7 +78,7 @@ fn get_symbols(contents: &String) -> u32 {
 
           // Read to the right
           while let Some(right) = n_line.get(&next) {
-            if right.is_digit(10) && right != &'.' {
+            if right.is_digit(10) {
               num.push(*right);
               next += 1;
             } else {
@@ -101,17 +101,18 @@ mod tests {
   use test::Bencher;
   use utils::read_file_to_string;
 
+  const FILE_NAME: &str = "inputs/day_03_a.txt";
+  const TASK_NAME: &str = "day_03_b";
+
   #[test]
-  fn day_03_b_it_works() {
+  fn test_day_03_b() {
     const ITERATIONS: u128 = 1;
-    const FILE_NAME: &str = "inputs/day_03_a.txt";
-    const ANSWER: Option<u32> = None;
-    utils::run_method::<u32>(&sum_active_symbols, FILE_NAME, ITERATIONS, ANSWER, "day 03 b");
+    const ANSWER: Option<u32> = Some(81463996);
+    utils::run_method::<u32>(&sum_active_symbols, FILE_NAME, ITERATIONS, ANSWER, TASK_NAME);
   }
 
   #[bench]
-  fn bench_day_02_a(b: &mut Bencher) {
-    const FILE_NAME: &str = "inputs/day_03_a.txt";
+  fn bench_day_03_b(b: &mut Bencher) {
     let input = read_file_to_string(FILE_NAME);
     b.iter(|| sum_active_symbols(input.clone()));
   }
