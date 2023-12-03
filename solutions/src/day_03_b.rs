@@ -68,8 +68,8 @@ fn get_symbols(contents: &String) -> u32 {
 
           // Get leftmost index
           let mut next = ny;
-          while let Some(left) = n_line.get(&(next - 1)) {
-            if left.is_digit(10) {
+          while next > 0 {
+            if n_line[&(next - 1)].is_digit(10) {
               next -= 1;
             } else {
               break;

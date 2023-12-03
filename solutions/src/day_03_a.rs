@@ -7,7 +7,10 @@ pub fn sum_active_symbols(contents: String) -> u32 {
   contents
     .lines()
     .enumerate()
-    .map(|(idx, line)| get_parts(line, symbols.get(&(idx-1)), symbols.get(&idx).unwrap(), symbols.get(&(idx+1))))
+    .map(|(idx, line)| {
+      let previous_line = if idx > 0 { Some(&symbols[&(idx-1)]) } else { None };
+      get_parts(line, previous_line, symbols.get(&idx).unwrap(), symbols.get(&(idx+1)))
+    })
     .sum()
 }
 
@@ -19,7 +22,7 @@ fn get_parts(line: &str, previous_line: Option<&Vec<usize>>, current_line: &Vec<
   for (idx, val) in line.chars().enumerate() {
     if val.is_digit(10) {
       total_num.push(val);
-      if !blessed {
+      if !blessed && idx > 0 {
         blessed = current_line.contains(&(idx-1)) || previous_line.unwrap_or(&Vec::<usize>::new()).contains(&(idx-1)) || next_line.unwrap_or(&Vec::<usize>::new()).contains(&(idx-1));
       }
     } else {
