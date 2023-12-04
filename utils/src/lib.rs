@@ -31,7 +31,7 @@ pub fn run_method<T: std::fmt::Debug + std::cmp::PartialEq>(method: &dyn Fn(Stri
     panic!("{test_name}: It took {elapsed}μs to complete once, it is going to take over 10 seconds to do that {iterations} times.");
   }
 
-  get_average_run_time::<T>(method, file_name, iterations, test_name);
+  // get_average_run_time::<T>(method, file_name, iterations, test_name);
 }
 
 fn get_average_run_time<T>(method: &dyn Fn(String) -> T, file_name: &str, iterations: u128, test_name: &str) {
