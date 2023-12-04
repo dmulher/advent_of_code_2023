@@ -1,13 +1,17 @@
 extern crate test;
 
-pub fn sum_active_symbols(contents: String) -> u32 {
+pub fn main(contents: String) -> u32 {
+  get_total_score(contents)
+}
+
+fn get_total_score(contents: String) -> u32 {
   contents
     .lines()
-    .map(|line| get_total_score(line))
+    .map(|line| get_line_score(line))
     .sum()
 }
 
-fn get_total_score(line: &str) -> u32 {
+fn get_line_score(line: &str) -> u32 {
   let mut map = line.split(':').skip(1).next().unwrap().split('|')
     .map(|half| half.trim().split_whitespace().map(|num| num.parse::<u8>().unwrap()).collect::<Vec<u8>>());
   let left: Vec<u8> = map.next().unwrap();
@@ -30,19 +34,23 @@ mod tests {
   use test::Bencher;
   use utils::read_file_to_string;
 
-  const FILE_NAME: &str = "inputs/day_04_a.txt";
-  const TASK_NAME: &str = "day_04_a";
+  const DAY: u8 = 4;
+  const PART: utils::Part = utils::Part::A;
 
   #[test]
   fn test_day_04_a() {
-    const ITERATIONS: u128 = 1;
+    const EXAMPLE_ANSWER: u32 = 13;
     const ANSWER: Option<u32> = Some(26443);
-    utils::run_method::<u32>(&sum_active_symbols, FILE_NAME, ITERATIONS, ANSWER, TASK_NAME);
+    match utils::run_method::<u32>(&main, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
+      Err(message) => panic!("{}", message),
+      Ok(val) if ANSWER.is_none() => println!("Answer for day {DAY}-{} = {val}", PART.lower_name()),
+      _ => (),
+    }
   }
 
   #[bench]
   fn bench_day_04_a(b: &mut Bencher) {
-    let input = read_file_to_string(FILE_NAME);
-    b.iter(|| sum_active_symbols(input.clone()));
+    let input = read_file_to_string(utils::get_file_name(DAY, None).as_str());
+    b.iter(|| main(input.clone()));
   }
 }

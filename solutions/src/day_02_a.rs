@@ -5,7 +5,11 @@ const RED_MAX: u32 = 12;
 const BLUE_MAX: u32 = 14;
 const GREEN_MAX: u32 = 13;
 
-pub fn get_possible_games(contents: String) -> u32 {
+pub fn main(contents: String) -> u32 {
+  get_possible_games(contents)
+}
+
+fn get_possible_games(contents: String) -> u32 {
   contents
     .lines()
     .filter(|line| is_set_valid(*line))
@@ -53,19 +57,23 @@ mod tests {
   use test::Bencher;
   use utils::read_file_to_string;
 
-  const FILE_NAME: &str = "inputs/day_02_a.txt";
-  const TASK_NAME: &str = "day_02_a";
+  const DAY: u8 = 2;
+  const PART: utils::Part = utils::Part::A;
 
   #[test]
   fn test_day_02_a() {
-    const ITERATIONS: u128 = 1;
+    const EXAMPLE_ANSWER: u32 = 8;
     const ANSWER: Option<u32> = Some(2268);
-    utils::run_method::<u32>(&get_possible_games, FILE_NAME, ITERATIONS, ANSWER, TASK_NAME);
+    match utils::run_method::<u32>(&main, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
+      Err(message) => panic!("{}", message),
+      Ok(val) if ANSWER.is_none() => println!("Answer for day {DAY}-{} = {val}", PART.lower_name()),
+      _ => (),
+    }
   }
 
   #[bench]
   fn bench_day_02_a(b: &mut Bencher) {
-    let input = read_file_to_string(FILE_NAME);
-    b.iter(|| get_possible_games(input.clone()));
+    let input = read_file_to_string(utils::get_file_name(DAY, None).as_str());
+    b.iter(|| main(input.clone()));
   }
 }
