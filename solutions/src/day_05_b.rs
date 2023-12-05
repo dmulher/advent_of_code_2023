@@ -81,7 +81,7 @@ fn get_total_score(contents: String) -> u32 {
   }
 
   seed_ranges = seed_ranges.iter().chain(next_seeds.iter()).map(|seed| *seed).collect();
-  return seed_ranges.into_iter().map(|range| range.start).min().unwrap(); // 250,145,417
+  return seed_ranges.into_iter().map(|range| range.start).min().unwrap();
 }
 
 #[cfg(test)]
