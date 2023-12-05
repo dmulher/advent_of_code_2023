@@ -7,19 +7,14 @@ pub fn main(contents: String) -> u32 {
 fn get_calibration(contents: String) -> u32 {
   contents
     .lines()
-    .map(|line| line.chars().filter(|num| num.is_digit(10)))
+    .map(|line| line.chars().filter_map(|num| num.to_digit(10)))
     .map(get_first_and_last)
-    .reduce(|acc, n| acc + n).unwrap()
+    .sum()
 }
 
-fn get_first_and_last(mut digits: impl Iterator<Item = char>) -> u32 {
+fn get_first_and_last(mut digits: impl DoubleEndedIterator<Item = u32>) -> u32 {
   match digits.next() {
-    Some(first) => {
-      let last = digits.last().unwrap_or(first);
-      let mut first_string = String::from(first);
-      first_string.push(last);
-      first_string.parse().unwrap()
-    },
+    Some(first) => first*10 + digits.rev().next().unwrap_or(first),
     None => 0
   }
 }
