@@ -1,52 +1,67 @@
 extern crate test;
+use std::collections::HashMap;
 
 pub fn main(contents: String) -> u32 {
   get_calibration(contents)
 }
 
 fn get_calibration(contents: String) -> u32 {
+  let char_to_word: HashMap<char, Vec<(&str, u32)>> = HashMap::from([
+    ('o', vec![("ne", 1)]),
+    ('t', vec![("wo", 2), ("hree", 3)]),
+    ('f', vec![("our", 4), ("ive", 5)]),
+    ('s', vec![("ix", 6), ("even", 7)]),
+    ('e', vec![("ight", 8)]),
+    ('n', vec![("ine", 9)]),
+  ]);
+
+  let char_to_word_backwards: HashMap<char, Vec<(&str, u32)>> = HashMap::from([
+    ('e', vec![("no", 1), ("erht", 3), ("vif", 5), ("nin", 9)]),
+    ('o', vec![("wt", 2)]),
+    ('r', vec![("uof", 4)]),
+    ('x', vec![("is", 6)]),
+    ('n', vec![("eves", 7)]),
+    ('t', vec![("hgie", 8)]),
+  ]);
+
   contents
     .lines()
-    .map(get_first_and_last)
+    .map(|line| get_first_and_last(line, &char_to_word, &char_to_word_backwards))
     .reduce(|acc, n| acc + n).unwrap()
 }
 
-fn get_first_and_last(line: &str) -> u32 {
-  let mut blah: Vec<u32> = vec![];
-  let mut patterns: Vec<String> = vec![];
+fn get_first_and_last(line: &str, char_to_word: &HashMap<char, Vec<(&str, u32)>>, char_to_word_backwards: &HashMap<char, Vec<(&str, u32)>>) -> u32 {
   let mut chars = line.chars();
+  let mut chars_rev = chars.clone().rev();
 
-  while let Some(c) = chars.next() {
-    if c.is_digit(10) {
-      blah.push(c.to_digit(10).unwrap());
-    } else {
-      let mut new_patterns: Vec<String> = patterns.into_iter().map(|mut patt| {
-        match (patt.as_str(), c) {
-          ("o", 'n' ) | ("t", 'w' | 'h' ) | ("th", 'r' ) | ("thr", 'e' ) | ("f", 'o' | 'i' ) | ("fo", 'u') | ("fi", 'v') | ("s", 'i' | 'e' ) | ("se", 'v') | ("sev", 'e') | ("e", 'i') | ("ei", 'g') | ("eig", 'h') | ("n", 'i') | ("ni", 'n') => {patt.push(c); Some(patt)},
-          ("on", 'e' ) => {blah.push(1); None},
-          ("tw", 'o' ) => {blah.push(2); None},
-          ("thre", 'e' ) => {blah.push(3); None},
-          ("fou", 'r' ) => {blah.push(4); None},
-          ("fiv", 'e' ) => {blah.push(5); None},
-          ("si", 'x' ) => {blah.push(6); None},
-          ("seve", 'n' ) => {blah.push(7); None},
-          ("eigh", 't' ) => {blah.push(8); None},
-          ("nin", 'e' ) => {blah.push(9); None},
-          _ => None
+  let first = search_line(&mut chars, vec![], char_to_word);
+  let last = search_line(&mut chars_rev, vec![], char_to_word_backwards);
+  match (first, last) {
+    (Some(f_n), Some(l_n)) => f_n * 10 + l_n,
+    _ => 0,
+  }
+}
+
+fn search_line(chars: &mut impl Iterator<Item = char>, remaining_words: Vec<(&str, u32)>, char_to_word: &HashMap<char, Vec<(&str, u32)>>) -> Option<u32> {
+  if let Some(c) = chars.next() {
+    if let Some(d) = c.to_digit(10) {
+      return Some(d);
+    }
+    let mut possible_words: Vec<(&str, u32)> = vec![];
+    for (p_s, p_v) in remaining_words.into_iter() {
+      if p_s.starts_with(c) {
+        if p_s.len() == 1 {
+          return Some(p_v);
         }
-      }).filter(|patt| patt.is_some()).map(|patt| patt.unwrap()).collect();
-      new_patterns.push(c.to_string());
-      patterns = new_patterns;
+        possible_words.push((&p_s[1 ..], p_v));
+      }
     }
-  }
-  match blah.first() {
-    None => 0,
-    Some(first) => {
-      let mut first_str = first.to_string();
-      first_str.push_str(&blah.last().unwrap_or(first).to_string());
-      first_str.parse().unwrap()
+    if let Some(new_patterns) = char_to_word.get(&c) {
+      possible_words.append(&mut new_patterns.clone());
     }
+    return search_line(chars, possible_words, char_to_word);
   }
+  None
 }
 
 #[cfg(test)]
