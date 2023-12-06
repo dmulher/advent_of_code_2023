@@ -5,9 +5,9 @@ pub fn main(contents: String) -> u64 {
 }
 
 fn get_total_score(contents: String) -> u64 {
-  let mut lines = contents.lines();
-  let time: u64 = lines.next().unwrap().split_whitespace().skip(1).collect::<String>().parse::<u64>().unwrap();
-  let distance: u64 = lines.next().unwrap().split_whitespace().skip(1).collect::<String>().parse::<u64>().unwrap();
+  let mut lines = contents.lines().map(|line| line.split_whitespace().skip(1).collect::<String>().parse::<u64>().unwrap());
+  let time: u64 = lines.next().unwrap();
+  let distance: u64 = lines.next().unwrap();
 
   get_quadratic(time, distance)
 }
@@ -46,13 +46,20 @@ fn get_quadratic(time: u64, distance: u64) -> u64 {
   let a = -1.0;
   let b = time as f64;
   let c = (distance as f64) * -1.0;
+
   let sqrt = ((b.powf(2.0) - 4.0*a*c) as f64).sqrt();
-  let int_1 = (-1.0*b + sqrt)/(2.0*a);
-  let int_2 = (-1.0*b - sqrt)/(2.0*a);
-  let lowest = int_1.min(int_2).ceil() as u64;
-  let highest = int_1.max(int_2).floor() as u64;
+  let factor_1 = (-1.0*b + sqrt)/(2.0*a);
+  let factor_2 = (-1.0*b - sqrt)/(2.0*a);
+  let min = factor_1.min(factor_2);
+  let max = factor_1.max(factor_2);
+  let lowest = if min.fract() == 0.0 { min + 1.0 } else { min }.ceil() as u64;
+  let highest = if max.fract() == 0.0 { max - 1.0 } else { max }.floor() as u64;
   highest - lowest + 1
 }
+
+// fn funny_single_line(contents: String) -> u64 {
+//   contents.lines().map(|line| line.split_whitespace().skip(1).collect::<String>().parse::<f64>().unwrap()).array_chunks::<2>().map(|[time, distance]| ((-1.0*time + (time.powf(2.0) - 4.0*distance).sqrt())/-2.0, (-1.0*time - (time.powf(2.0) - 4.0*distance).sqrt())/-2.0)).map(|(fac_1, fac_2)| (fac_1.max(fac_2).floor() as u64) - (fac_1.min(fac_2).ceil() as u64) + 1).next().unwrap()
+// }
 
 #[cfg(test)]
 mod tests {
