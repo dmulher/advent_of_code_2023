@@ -12,6 +12,8 @@ mod day_05_a;
 mod day_05_b;
 mod day_06_a;
 mod day_06_b;
+mod day_07_a;
+mod day_07_b;
 
 pub fn run_all_days() {
     day_01_a::main("".to_string());
@@ -26,4 +28,6 @@ pub fn run_all_days() {
     day_05_b::main("".to_string());
     day_06_a::main("".to_string());
     day_06_b::main("".to_string());
+    day_07_a::main("".to_string());
+    day_07_b::main("".to_string());
 }
