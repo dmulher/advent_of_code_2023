@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 extern crate test;
 
 pub fn main(contents: String) -> u32 {
