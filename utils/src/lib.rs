@@ -37,6 +37,8 @@ pub fn run_method<T: std::fmt::Debug + std::cmp::PartialEq + std::fmt::Display>(
   let test_response = method(read_file_to_string(example_file_name.as_str()));
   if test_response != test_answer {
     return Err(format!("Test response was incorrect. Expected: {test_answer}. Actual: {test_response}"));
+  } else {
+    println!("Test response was correct");
   }
 
   let response = method(read_file_to_string(input_file_name.as_str()));
