@@ -46,65 +46,13 @@ fn find_all_captured_pieces(contents: String) -> u32 {
     _ => panic!("starting pipe is whack"),
   };
 
-  let mut path: Vec<(usize, usize)> = vec![];
   // Get the original path
   map.insert(start_idx, real_starting_pipe);
+  let path = follow_path(start_idx, entry_move_direction, &map, height, width);
 
-  let mut next_cell = Some((start_idx, entry_move_direction));
-  while let Some((pos, move_dir)) = next_cell {
-    // Check in look direction, move along path
-    if path.contains(&pos) {
-      break;
-    } else {
-      path.push(pos);
-    }
-    let curr_pipe = map.get(&pos);
-    let next_dir = match curr_pipe {
-      Some(Pipe::Horizontal | Pipe::Vertical) => move_dir,
-      Some(Pipe::Corner(ns, es)) => follow_corner(ns, es, &move_dir),
-      _ => panic!("Something went wrong"),
-    };
-    if let Some(next_pos) = apply_dir_to_pos(pos, next_dir, height, width) {
-      next_cell = Some((next_pos, next_dir));
-    } else {
-      next_cell = None;
-    }
-  }
+  let mut visited: HashSet<(usize, usize)> = HashSet::new();
 
-  let mut visited: HashSet<(usize, usize)> = HashSet::with_capacity(map.len());
-  let mut captures: VecDeque<((usize, usize), Direction)> = VecDeque::new();
-  let entry_point = get_inside(&map, height, width, &mut visited, &path);
-  let entry_move_direction = Direction::West;
-  let entry_look_direction = Direction::South;
-
-  // Get the outer-most part
-  let mut next_cell = Some((entry_point, entry_move_direction, entry_look_direction));
-  // Iterate through the path again, now knowing what the inside is
-  while let Some((pos, move_dir, look_dir)) = next_cell {
-    // Check in look direction, move along path
-    if !visited.insert(pos) {
-      break;
-    }
-    for looked_capture in look_around(pos, look_dir, &map, height, width, &mut visited, &path) {
-      captures.push_back(looked_capture);
-    }
-    let curr_pipe = map.get(&pos);
-    let next_dir = match curr_pipe {
-      Some(Pipe::Horizontal | Pipe::Vertical) => move_dir,
-      Some(Pipe::Corner(ns, es)) => follow_corner(ns, es, &move_dir),
-      _ => panic!("Something went wrong"),
-    };
-    let next_look = match curr_pipe {
-      Some(Pipe::Horizontal | Pipe::Vertical) => look_dir,
-      Some(Pipe::Corner(ns, es)) => keep_look_orientation_around_corner(ns, es, &look_dir),
-      _ => panic!("Something went wrong"),
-    };
-    if let Some(next_pos) = apply_dir_to_pos(pos, next_dir, height, width) {
-      next_cell = Some((next_pos, next_dir, next_look));
-    } else {
-      next_cell = None;
-    }
-  }
+  let mut captures: VecDeque<((usize, usize), Direction)> = get_inside_boundary(&map, &mut visited, &path, height, width);
 
   let mut total: u32 = 0;
   while let Some((inside, dir)) = captures.pop_front() {
@@ -160,6 +108,68 @@ fn get_starting_pipe(start_idx: (usize, usize), map: &HashMap<(usize, usize), Pi
   let starting_west = starting_dirs.contains(&Direction::West);
 
   if starting_north && starting_south { Pipe::Vertical } else if starting_east && starting_west { Pipe::Horizontal } else {Pipe::Corner(starting_dirs[0], starting_dirs[1])}
+}
+
+fn get_inside_boundary(map: &HashMap<(usize, usize), Pipe>, visited: &mut HashSet<(usize, usize)>, path: &Vec<(usize, usize)>, height: usize, width: usize) -> VecDeque<((usize, usize), Direction)> {
+  let mut captures: VecDeque<((usize, usize), Direction)> = VecDeque::new();
+  let entry_point = get_inside(&map, height, width, visited, &path);
+  let entry_move_direction = Direction::West;
+  let entry_look_direction = Direction::South;
+
+  // Get the outer-most part
+  let mut next_cell = Some((entry_point, entry_move_direction, entry_look_direction));
+  // Iterate through the path again, now knowing what the inside is
+  while let Some((pos, move_dir, look_dir)) = next_cell {
+    // Check in look direction, move along path
+    if !visited.insert(pos) {
+      break;
+    }
+    for looked_capture in look_around(pos, look_dir, &map, height, width, visited, &path) {
+      captures.push_back(looked_capture);
+    }
+    let curr_pipe = map.get(&pos);
+    let next_dir = match curr_pipe {
+      Some(Pipe::Horizontal | Pipe::Vertical) => move_dir,
+      Some(Pipe::Corner(ns, es)) => follow_corner(ns, es, &move_dir),
+      _ => panic!("Something went wrong"),
+    };
+    let next_look = match curr_pipe {
+      Some(Pipe::Horizontal | Pipe::Vertical) => look_dir,
+      Some(Pipe::Corner(ns, es)) => keep_look_orientation_around_corner(ns, es, &look_dir),
+      _ => panic!("Something went wrong"),
+    };
+    if let Some(next_pos) = apply_dir_to_pos(pos, next_dir, height, width) {
+      next_cell = Some((next_pos, next_dir, next_look));
+    } else {
+      next_cell = None;
+    }
+  }
+  captures
+}
+
+fn follow_path(start_idx: (usize, usize), entry_move_direction: Direction, map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize) -> Vec<(usize, usize)> {
+  let mut path: Vec<(usize, usize)> = vec![];
+  let mut next_cell = Some((start_idx, entry_move_direction));
+  while let Some((pos, move_dir)) = next_cell {
+    // Check in look direction, move along path
+    if path.contains(&pos) {
+      break;
+    } else {
+      path.push(pos);
+    }
+    let curr_pipe = map.get(&pos);
+    let next_dir = match curr_pipe {
+      Some(Pipe::Horizontal | Pipe::Vertical) => move_dir,
+      Some(Pipe::Corner(ns, es)) => follow_corner(ns, es, &move_dir),
+      _ => panic!("Something went wrong"),
+    };
+    if let Some(next_pos) = apply_dir_to_pos(pos, next_dir, height, width) {
+      next_cell = Some((next_pos, next_dir));
+    } else {
+      next_cell = None;
+    }
+  }
+  path
 }
 
 fn apply_dir_to_pos(pos: (usize, usize), dir: Direction, height: usize, width: usize) -> Option<(usize, usize)> {
