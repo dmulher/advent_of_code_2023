@@ -38,6 +38,7 @@ fn find_all_captured_pieces(contents: String) -> u32 {
   let (start_idx, mut map) = build_map(&contents);
   let (width, height) = map.keys().map(|(i, j)| (i+1, j+1)).max().unwrap();
 
+  // Figure out what the starting pipe actually is
   let real_starting_pipe = get_starting_pipe(start_idx, &map, height, width);
   let entry_move_direction = match real_starting_pipe {
     Pipe::Vertical => Direction::North,
@@ -52,9 +53,11 @@ fn find_all_captured_pieces(contents: String) -> u32 {
 
   let mut visited: HashSet<(usize, usize)> = HashSet::new();
 
+  // Get all non-path internal nodes
   let mut captures: VecDeque<((usize, usize), Direction)> = get_inside_boundary(&map, &mut visited, &path, height, width);
 
   let mut total: u32 = 0;
+  // Iterate through the internal nodes and spread out
   while let Some((inside, dir)) = captures.pop_front() {
     let inside_pipe = map.get(&inside);
     if let Some(_) = inside_pipe {
@@ -110,7 +113,7 @@ fn get_starting_pipe(start_idx: (usize, usize), map: &HashMap<(usize, usize), Pi
   if starting_north && starting_south { Pipe::Vertical } else if starting_east && starting_west { Pipe::Horizontal } else {Pipe::Corner(starting_dirs[0], starting_dirs[1])}
 }
 
-fn get_inside_boundary(map: &HashMap<(usize, usize), Pipe>, visited: &mut HashSet<(usize, usize)>, path: &Vec<(usize, usize)>, height: usize, width: usize) -> VecDeque<((usize, usize), Direction)> {
+fn get_inside_boundary(map: &HashMap<(usize, usize), Pipe>, visited: &mut HashSet<(usize, usize)>, path: &HashSet<(usize, usize)>, height: usize, width: usize) -> VecDeque<((usize, usize), Direction)> {
   let mut captures: VecDeque<((usize, usize), Direction)> = VecDeque::new();
   let entry_point = get_inside(&map, height, width, visited, &path);
   let entry_move_direction = Direction::West;
@@ -147,15 +150,15 @@ fn get_inside_boundary(map: &HashMap<(usize, usize), Pipe>, visited: &mut HashSe
   captures
 }
 
-fn follow_path(start_idx: (usize, usize), entry_move_direction: Direction, map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize) -> Vec<(usize, usize)> {
-  let mut path: Vec<(usize, usize)> = vec![];
+fn follow_path(start_idx: (usize, usize), entry_move_direction: Direction, map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize) -> HashSet<(usize, usize)> {
+  let mut path: HashSet<(usize, usize)> = HashSet::new();
   let mut next_cell = Some((start_idx, entry_move_direction));
   while let Some((pos, move_dir)) = next_cell {
     // Check in look direction, move along path
     if path.contains(&pos) {
       break;
     } else {
-      path.push(pos);
+      path.insert(pos);
     }
     let curr_pipe = map.get(&pos);
     let next_dir = match curr_pipe {
@@ -184,7 +187,7 @@ fn apply_dir_to_pos(pos: (usize, usize), dir: Direction, height: usize, width: u
   }
 }
 
-fn get_inside(map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize, visited: &mut HashSet<(usize, usize)>, path: &Vec<(usize, usize)>) -> (usize, usize) {
+fn get_inside(map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize, visited: &mut HashSet<(usize, usize)>, path: &HashSet<(usize, usize)>) -> (usize, usize) {
   for j in 0..height {
     for i in 0..width {
       let map_val = map.get(&(i, j));
@@ -202,7 +205,7 @@ fn get_inside(map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize, 
   panic!("Something went wrong");
 }
 
-fn look_around(pos: (usize, usize), looking: Direction, map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize, visited: &mut HashSet<(usize, usize)>, path: &Vec<(usize, usize)>) -> Vec<((usize, usize), Direction)> {
+fn look_around(pos: (usize, usize), looking: Direction, map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize, visited: &mut HashSet<(usize, usize)>, path: &HashSet<(usize, usize)>) -> Vec<((usize, usize), Direction)> {
   let pipe_type = map.get(&pos);
   let mut looked_spaces = vec![];
   if let Some(Pipe::Corner(ns, ew)) = pipe_type {
