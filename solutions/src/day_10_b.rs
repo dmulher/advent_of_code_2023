@@ -27,9 +27,7 @@ impl Direction {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Pipe {
-  Inside,
   Ground,
-  Debris,
   Starting,
   Horizontal,
   Vertical,
@@ -42,15 +40,15 @@ fn find_all_captured_pieces(contents: String) -> u32 {
 
   let real_starting_pipe = get_starting_pipe(start_idx, &map, height, width);
   let entry_move_direction = match real_starting_pipe {
-    Pipe::Vertical => Direction::West,
-    Pipe::Horizontal => Direction::North,
+    Pipe::Vertical => Direction::North,
+    Pipe::Horizontal => Direction::West,
     Pipe::Corner(ns, _) => ns,
     _ => panic!("starting pipe is whack"),
   };
 
   let mut path: Vec<(usize, usize)> = vec![];
   // Get the original path
-  map.insert(start_idx, get_starting_pipe(start_idx, &map, height, width));
+  map.insert(start_idx, real_starting_pipe);
 
   let mut next_cell = Some((start_idx, entry_move_direction));
   while let Some((pos, move_dir)) = next_cell {
@@ -75,7 +73,7 @@ fn find_all_captured_pieces(contents: String) -> u32 {
 
   let mut visited: HashSet<(usize, usize)> = HashSet::with_capacity(map.len());
   let mut captures: VecDeque<((usize, usize), Direction)> = VecDeque::new();
-  let entry_point = get_inside(&mut map, height, width, &mut visited, &path);
+  let entry_point = get_inside(&map, height, width, &mut visited, &path);
   let entry_move_direction = Direction::West;
   let entry_look_direction = Direction::South;
 
@@ -108,12 +106,11 @@ fn find_all_captured_pieces(contents: String) -> u32 {
     }
   }
 
-  let mut normal_pos: HashSet<(usize, usize)> = HashSet::new();
+  let mut total: u32 = 0;
   while let Some((inside, dir)) = captures.pop_front() {
     let inside_pipe = map.get(&inside);
     if let Some(_) = inside_pipe {
-      map.insert(inside, Pipe::Inside);
-      normal_pos.insert(inside);
+      total += 1;
     }
 
     for (pos, dir) in get_all_neighbouring_dir(inside, dir, &map, height, width, &mut visited) {
@@ -121,8 +118,7 @@ fn find_all_captured_pieces(contents: String) -> u32 {
     }
   }
 
-  let actual_total = map.into_values().filter(|pipe| pipe == &Pipe::Inside).count() as u32;
-  actual_total
+  total
 }
 
 fn build_map(contents: &String) -> ((usize, usize), HashMap<(usize, usize), Pipe>) {
@@ -163,7 +159,7 @@ fn get_starting_pipe(start_idx: (usize, usize), map: &HashMap<(usize, usize), Pi
   let starting_east = starting_dirs.contains(&Direction::East);
   let starting_west = starting_dirs.contains(&Direction::West);
 
-  if starting_north && starting_south { Pipe::Horizontal } else if starting_east && starting_west { Pipe::Vertical } else {Pipe::Corner(starting_dirs[0], starting_dirs[1])}
+  if starting_north && starting_south { Pipe::Vertical } else if starting_east && starting_west { Pipe::Horizontal } else {Pipe::Corner(starting_dirs[0], starting_dirs[1])}
 }
 
 fn apply_dir_to_pos(pos: (usize, usize), dir: Direction, height: usize, width: usize) -> Option<(usize, usize)> {
@@ -178,7 +174,7 @@ fn apply_dir_to_pos(pos: (usize, usize), dir: Direction, height: usize, width: u
   }
 }
 
-fn get_inside(map: &mut HashMap<(usize, usize), Pipe>, height: usize, width: usize, visited: &mut HashSet<(usize, usize)>, path: &Vec<(usize, usize)>) -> (usize, usize) {
+fn get_inside(map: &HashMap<(usize, usize), Pipe>, height: usize, width: usize, visited: &mut HashSet<(usize, usize)>, path: &Vec<(usize, usize)>) -> (usize, usize) {
   for j in 0..height {
     for i in 0..width {
       let map_val = map.get(&(i, j));
@@ -187,7 +183,6 @@ fn get_inside(map: &mut HashMap<(usize, usize), Pipe>, height: usize, width: usi
         continue;
       } else if !path.contains(&(i, j)) {
         visited.insert((i, j));
-        map.insert((i, j), Pipe::Debris);
         continue;
       } else if let Some(&Pipe::Corner(Direction::South, Direction::East)) = map_val {
         return (i, j);
