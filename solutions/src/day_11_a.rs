@@ -8,33 +8,33 @@ pub fn main(contents: String) -> u32 {
 
 fn get_shortest_total_distance(contents: String) -> u32 {
   const GALAXY: char = '#';
-  let grid: Vec<Vec<char>> = contents
+  let height = contents.lines().count(); // O(n)
+  let mut empty_cols = (0..(height)).into_iter().collect::<HashSet<_>>(); // O(n)
+  let mut empty_rows = HashSet::<usize>::new(); // O(m)
+  let mut galaxies = HashSet::<(usize, usize)>::new(); // O(m*n)
+  contents
     .lines()
-    .map(|line| line.chars().collect())
-    .collect();
-
-  let width = grid.len();
-  let height = grid[0].len();
-  let mut empty_cols = (0..(height)).into_iter().collect::<HashSet<_>>();
-  let mut empty_rows = HashSet::<usize>::new();
-  let mut galaxies = HashSet::<(usize, usize)>::new();
-  for (j, line) in grid.iter().enumerate() {
-    let mut empty_row = true;
-    for (i, c) in line.iter().enumerate() {
-      if c == &GALAXY {
-        empty_row = false;
-        empty_cols.remove(&(i));
-        galaxies.insert((i, j));
+    .map(|line| line.char_indices())
+    .enumerate()
+    .for_each(|(j, chars)| {
+      let mut empty_row = true;
+      chars.for_each(|(i, c)| {
+        if c == GALAXY {
+          empty_row = false;
+          empty_cols.remove(&(i));
+          galaxies.insert((i, j));
+        }
+      });
+      if empty_row {
+        empty_rows.insert(j);
       }
-    }
-    if empty_row {
-      empty_rows.insert(j);
-    }
-  }
+    }); // O(n*m)
+  let width = height; // Assumption, the grid is always square
 
   let mut x_adj: i32 = 0;
-  let mut all: Vec<(i32, i32)> = vec![];
+  let mut all: Vec<(i32, i32)> = vec![]; // O(n*m)
   let mut total_sum: u32 = 0;
+  let adj_step: i32 = 1;
   for i in 0..width {
     if empty_cols.contains(&i) { x_adj += 1; }
     else {
@@ -43,9 +43,9 @@ fn get_shortest_total_distance(contents: String) -> u32 {
         if empty_rows.contains(&j) { y_adj += 1; }
         else {
           if let Some(_) = galaxies.take(&(i, j)) {
-            let new_galaxy = ((i as i32) + x_adj, (j as i32) + y_adj);
+            let new_galaxy = ((i as i32) + x_adj * adj_step, (j as i32) + y_adj * adj_step);
             for g in all.iter() {
-              total_sum += distance_between(&new_galaxy, g);
+              total_sum += distance_between(&new_galaxy, g); // O((n*m)^2)
             }
             all.push(new_galaxy);
           }
