@@ -21,7 +21,7 @@ fn get_reflections(contents: String) -> usize {
     }
   });
 
-  patterns.into_iter().enumerate().map(|(idx, p)| {
+  patterns.into_iter().map(|p| {
     // let row_symm_0 = find_symmetry(&p, 1, MatchType::Rows, 0);
     // let row_symm_1 = find_symmetry(&p, 1, MatchType::Rows, 1);
 
