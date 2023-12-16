@@ -1,9 +1,11 @@
-use std::collections::HashMap;
-
 extern crate test;
 
 pub fn main(contents: String) -> u32 {
-  0
+  hash(contents)
+}
+
+fn hash(contents: String) -> u32 {
+  contents.split(',').map(|chunk| chunk.bytes().fold(0, |acc, c| (acc + c)*17) as u32).sum()
 }
 
 #[cfg(test)]
@@ -17,8 +19,8 @@ mod tests {
 
   #[test]
   fn test_day_15_a() {
-    const EXAMPLE_ANSWER: u32 = 0;
-    const ANSWER: Option<u32> = None;
+    const EXAMPLE_ANSWER: u32 = 1320;
+    const ANSWER: Option<u32> = Some(509167);
     match utils::run_method::<u32>(&main, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
       Err(message) => panic!("{}", message),
       Ok(val) if ANSWER.is_none() => println!("Answer for day {DAY}-{} = {val}", PART.lower_name()),
