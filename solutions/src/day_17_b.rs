@@ -76,24 +76,28 @@ impl Hash for Node {
 
 impl Node {
   fn can_go_up(&self) -> bool {
-    self.y > 0 && (self.count == 0 || ((self.dir == Direction::Up && self.count < 10) || ((self.dir == Direction::Left || self.dir == Direction::Right) && self.count > 3)))
+    (self.y > 0 && self.dir == Direction::Up && self.count < 10) || (self.y > 3 && (self.count == 0 || ((self.dir == Direction::Left || self.dir == Direction::Right) && self.count > 3)))
   }
   fn can_go_down(&self, height: usize) -> bool {
-    self.y < height - 1 && (self.count == 0 || ((self.dir == Direction::Down && self.count < 10) || ((self.dir == Direction::Left || self.dir == Direction::Right) && self.count > 3)))
+    (self.y < height - 1 && self.dir == Direction::Down && self.count < 10) || (self.y < height - 4 && (self.count == 0 || ((self.dir == Direction::Left || self.dir == Direction::Right) && self.count > 3)))
   }
   fn can_go_left(&self) -> bool {
-    self.x > 0 && (self.count == 0 || ((self.dir == Direction::Left && self.count < 10) || ((self.dir == Direction::Up || self.dir == Direction::Down) && self.count > 3)))
+    (self.x > 0 && self.dir == Direction::Left && self.count < 10) || (self.x > 3 && (self.count == 0 || ((self.dir == Direction::Up || self.dir == Direction::Down) && self.count > 3)))
   }
   fn can_go_right(&self, width: usize) -> bool {
-    self.x < width - 1 && (self.count == 0 || ((self.dir == Direction::Right && self.count < 10) || ((self.dir == Direction::Up || self.dir == Direction::Down) && self.count > 3)))
+    (self.x < width - 1 && self.dir == Direction::Right && self.count < 10) || (self.x < width - 4 && (self.count == 0 || ((self.dir == Direction::Up || self.dir == Direction::Down) && self.count > 3)))
+  }
+
+  fn get_travel_length(&self, dir: &Direction) -> usize {
+    if &self.dir != dir || self.count == 0 { 4 } else { 1 }
   }
 
   fn travel(&self, dir: &Direction, height: usize, width: usize) -> Option<(usize, usize)> {
     match dir {
-      Direction::Up => if self.can_go_up() {Some((self.x, self.y - 1))} else {None},
-      Direction::Down => if self.can_go_down(height) {Some((self.x, self.y + 1))} else {None},
-      Direction::Left => if self.can_go_left() {Some((self.x - 1, self.y))} else {None},
-      Direction::Right => if self.can_go_right(width) {Some((self.x + 1, self.y))} else {None},
+      Direction::Up => if self.can_go_up() {Some((self.x, self.y - self.get_travel_length(dir)))} else {None},
+      Direction::Down => if self.can_go_down(height) {Some((self.x, self.y + self.get_travel_length(dir)))} else {None},
+      Direction::Left => if self.can_go_left() {Some((self.x - self.get_travel_length(dir), self.y))} else {None},
+      Direction::Right => if self.can_go_right(width) {Some((self.x + self.get_travel_length(dir), self.y))} else {None},
     }
   }
 }
@@ -115,7 +119,7 @@ fn find_all_paths(heat_map: &Vec<Vec<u32>>) -> u32 {
 
   distances.push(Reverse(Node{x: 0, y: 0, dir: Direction::Right, count: 0, distance: 0}));
   while let Some(Reverse(node)) = distances.pop() {
-    if node.x == width - 1 && node.y == height - 1 && node.count > 3 {
+    if node.x == width - 1 && node.y == height - 1 {
       return node.distance;
     }
 
@@ -123,9 +127,10 @@ fn find_all_paths(heat_map: &Vec<Vec<u32>>) -> u32 {
       .into_iter()
       .filter_map(|dir| {
         if let Some((x, y)) = node.travel(&dir, width, height) {
-          let count = if node.dir == dir {node.count + 1} else {1};
+          let turned = node.dir != dir || node.count == 0;
+          let count = if turned {4} else {node.count + 1};
           if visited.insert(hash(x, y, &dir, count)) {
-            let distance = node.distance + heat_map[x][y];
+            let distance = node.distance + stack_heat(heat_map, &dir, node.x, node.y, x, y);
             let new_node = Node{x, y, dir, count, distance};
             return Some(new_node);
           }
@@ -135,6 +140,15 @@ fn find_all_paths(heat_map: &Vec<Vec<u32>>) -> u32 {
       .for_each(|new_node| distances.push(Reverse(new_node)));
   }
   0
+}
+
+fn stack_heat(heat_map: &Vec<Vec<u32>>, dir: &Direction, last_x: usize, last_y: usize, x: usize, y: usize) -> u32 {
+  match dir {
+    Direction::Up => heat_map[y..last_y].iter().map(|l| l[x]).sum(),
+    Direction::Down => heat_map[last_y+1..=y].iter().map(|l| l[x]).sum(),
+    Direction::Left => heat_map[y][x..last_x].iter().sum(),
+    Direction::Right => heat_map[y][last_x+1..=x].iter().sum(),
+  }
 }
 
 #[cfg(test)]
