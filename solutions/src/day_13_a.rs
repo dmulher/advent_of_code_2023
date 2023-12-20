@@ -131,7 +131,7 @@ mod tests {
 
   #[test]
   fn test_day_13_a() {
-    const EXAMPLE_ANSWER: usize = 405;
+    const EXAMPLE_ANSWER: Option<usize> = Some(405);
     const ANSWER: Option<usize> = Some(27502);
     match utils::run_method::<usize>(&main, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
       Err(message) => panic!("{}", message),

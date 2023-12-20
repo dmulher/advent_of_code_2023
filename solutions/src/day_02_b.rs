@@ -64,7 +64,7 @@ mod tests {
 
   #[test]
   fn test_day_02_b() {
-    const EXAMPLE_ANSWER: u32 = 2286;
+    const EXAMPLE_ANSWER: Option<u32> = Some(2286);
     const ANSWER: Option<u32> = Some(63542);
     match utils::run_method::<u32>(&main, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
       Err(message) => panic!("{}", message),

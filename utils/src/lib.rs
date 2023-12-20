@@ -29,16 +29,18 @@ impl Part {
   }
 }
 
-pub fn run_method<T: std::fmt::Debug + std::cmp::PartialEq + std::fmt::Display>(method: &dyn Fn(String) -> T, day: u8, part: Part, answers: (T, Option<T>)) -> Result<T, String> {
+pub fn run_method<T: std::fmt::Debug + std::cmp::PartialEq + std::fmt::Display>(method: &dyn Fn(String) -> T, day: u8, part: Part, answers: (Option<T>, Option<T>)) -> Result<T, String> {
   let input_file_name = get_file_name(day, None);
   let example_file_name = get_file_name(day, Some(part));
-  let (test_answer, part_answer) = answers;
+  let (test_ans, part_answer) = answers;
 
-  let test_response = method(read_file_to_string(example_file_name.as_str()));
-  if test_response != test_answer {
-    return Err(format!("Test response was incorrect. Expected: {test_answer}. Actual: {test_response}"));
-  } else {
-    println!("Test response was correct");
+  if let Some(test_answer) = test_ans {
+    let test_response = method(read_file_to_string(example_file_name.as_str()));
+    if test_response != test_answer {
+      return Err(format!("Test response was incorrect. Expected: {test_answer}. Actual: {test_response}"));
+    } else {
+      println!("Test response was correct");
+    }
   }
 
   let response = method(read_file_to_string(input_file_name.as_str()));

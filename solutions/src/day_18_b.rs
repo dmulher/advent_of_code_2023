@@ -65,7 +65,7 @@ mod tests {
 
   #[test]
   fn test_day_18_b() {
-    const EXAMPLE_ANSWER: u64 = 952408144115;
+    const EXAMPLE_ANSWER: Option<u64> = Some(952408144115);
     const ANSWER: Option<u64> = Some(40654918441248);
     match utils::run_method::<u64>(&main, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
       Err(message) => panic!("{}", message),

@@ -124,7 +124,7 @@ mod tests {
 
   // #[test]
   // fn test_day_12_b_recursion() {
-  //   const EXAMPLE_ANSWER: u64 = 525152;
+  //   const EXAMPLE_ANSWER: Option<u32> = Some(525152;
   //   const ANSWER: Option<u64> = Some(204640299929836);
   //   match utils::run_method::<u64>(&recursion, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
   //     Err(message) => panic!("{}", message),
@@ -135,7 +135,7 @@ mod tests {
 
   #[test]
   fn test_day_12_b_looping() {
-    const EXAMPLE_ANSWER: u64 = 525152;
+    const EXAMPLE_ANSWER: Option<u64> = Some(525152);
     const ANSWER: Option<u64> = Some(204640299929836);
     match utils::run_method::<u64>(&looping, DAY, PART, (EXAMPLE_ANSWER, ANSWER)) {
       Err(message) => panic!("{}", message),
