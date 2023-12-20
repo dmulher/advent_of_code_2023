@@ -1,4 +1,5 @@
 use std::{collections::{hash_map::DefaultHasher, HashMap, VecDeque}, hash::{Hash, Hasher}};
+use utils::maths::Lcm;
 
 extern crate test;
 
@@ -40,7 +41,7 @@ fn do_everything(contents: String) -> u64 {
       println!("{count} => {}", cycles.len());
     }
   }
-  cycles.into_iter().reduce(|acc, val| lcm(acc, val)).unwrap()
+  cycles.into_iter().reduce(|acc, val| u64::lcm(acc, val)).unwrap()
 }
 
 fn convert_input_to_modules(contents: String) -> HashMap<u64, Module> {
@@ -119,17 +120,6 @@ fn hash_name(name: &str) -> u64 {
   let mut h = DefaultHasher::new();
   name.hash(&mut h);
   h.finish()
-}
-
-fn lcm(a: u64, b: u64) -> u64 {
-  a * b / gcd(a, b)
-}
-
-fn gcd(a: u64, b: u64) -> u64 {
-  match b {
-    0 => a,
-    _ => gcd(b, a % b)
-  }
 }
 
 #[derive(Debug)]

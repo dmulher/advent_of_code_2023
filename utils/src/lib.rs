@@ -3,6 +3,8 @@ use std::io::Write;
 // use std::time::Instant;
 // use std::time::Duration;
 
+pub mod maths;
+
 pub fn create_file_to_write_to(file_name: &str) -> fs::File {
   fs::File::create(file_name).unwrap()
 }

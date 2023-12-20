@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use utils::maths::Lcm;
 
 extern crate test;
 
@@ -44,19 +45,8 @@ fn get_steps(contents: String) -> u64 {
       }
       steps
     })
-    .reduce(|acc, val| lcm(acc, val))
+    .reduce(|acc, val| u64::lcm(acc, val))
     .unwrap()
-}
-
-fn lcm(a: u64, b: u64) -> u64 {
-  a * b / gcd(a, b)
-}
-
-fn gcd(a: u64, b: u64) -> u64 {
-  match b {
-    0 => a,
-    _ => gcd(b, a % b)
-  }
 }
 
 #[cfg(test)]
