@@ -10,8 +10,8 @@ fn looping(contents: String) -> u32 {
 
 fn get_val_for_line_l(line: &str) -> u32 {
   let mut line_split = line.split_whitespace();
-  let springs = [line_split.next().unwrap(); 5].join("?");
-  let nums = line_split.next().unwrap().split(',').map(|x| x.parse::<usize>().unwrap()).collect::<Vec<usize>>().repeat(5);
+  let springs = line_split.next().unwrap();
+  let nums = line_split.next().unwrap().split(',').map(|x| x.parse::<usize>().unwrap()).collect::<Vec<usize>>();
 
   get_val_l(&springs, &nums) as u32
 }
