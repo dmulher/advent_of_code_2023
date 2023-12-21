@@ -4,10 +4,10 @@ use utils::maths::Lcm;
 extern crate test;
 
 pub fn main(contents: String) -> u64 {
-  do_everything(contents)
+  find_output_signal(contents)
 }
 
-fn do_everything(contents: String) -> u64 {
+fn find_output_signal(contents: String) -> u64 {
   let broadcast_module_name = hash_name("broadcaster");
   let mut modules = convert_input_to_modules(contents);
   let inputs = get_inputs(&modules);

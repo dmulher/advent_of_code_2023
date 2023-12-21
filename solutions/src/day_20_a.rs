@@ -3,10 +3,10 @@ use std::{collections::{hash_map::DefaultHasher, HashMap, VecDeque}, hash::{Hash
 extern crate test;
 
 pub fn main(contents: String) -> u32 {
-  do_everything(contents)
+  find_signal_count(contents)
 }
 
-fn do_everything(contents: String) -> u32 {
+fn find_signal_count(contents: String) -> u32 {
   let mut modules = convert_input_to_modules(contents);
   let broadcast_module_name = hash_name("broadcaster");
   let mut module_pinger: VecDeque<(u64, bool, u64)> = VecDeque::new();
