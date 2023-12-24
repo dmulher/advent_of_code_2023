@@ -46,8 +46,8 @@ mod day_22_a;
 mod day_22_b;
 mod day_23_a;
 mod day_23_b;
-// mod day_24_a;
-// mod day_24_b;
+mod day_24_a;
+mod day_24_b;
 // mod day_25_a;
 // mod day_25_b;
 
@@ -98,8 +98,8 @@ pub fn run_all_days() {
     day_22_b::main("".to_string());
     day_23_a::main("".to_string());
     day_23_b::main("".to_string());
-    // day_24_a::main("".to_string());
-    // day_24_b::main("".to_string());
+    day_24_a::main("".to_string());
+    day_24_b::main("".to_string());
     // day_25_a::main("".to_string());
     // day_25_b::main("".to_string());
 }
